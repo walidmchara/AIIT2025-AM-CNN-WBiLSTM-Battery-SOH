@@ -1,0 +1,30 @@
+{
+  "doi": "10.1109/AIIT63112.2025.11082918",
+  "model": {
+    "conv_filters": [32, 64, 128],
+    "conv_kernels": [3, 3, 3],
+    "pool_sizes": [2, 2, 2],
+    "dropout": 0.3,
+    "lstm_hidden": 156,
+    "attention_units": 312,
+    "morlet_frequency": 2.1,
+    "morlet_variance_divisor": 3.0,
+    "loss": "mse",
+    "optimizer": "Adam",
+    "attention_paper_activation": "sigmoid"
+  },
+  "protocol_choices_not_reported_exactly_in_paper": {
+    "lookback_cycles": 16,
+    "learning_rate": 0.001,
+    "batch_size": 32,
+    "epochs": 20,
+    "validation_last_fraction_per_development_cell": 0.2,
+    "seed": 42,
+    "soh_definition": "capacity divided by first observed discharge capacity of that cell"
+  },
+  "features": ["voltage_mean", "voltage_std", "current_mean", "current_std", "temperature_mean", "discharge_duration_s", "ambient_temperature"],
+  "experiments": {
+    "24C": {"train": ["B0005", "B0006", "B0007"], "test": "B0018"},
+    "43C": {"train": ["B0029", "B0031", "B0032"], "test": "B0030"}
+  }
+}

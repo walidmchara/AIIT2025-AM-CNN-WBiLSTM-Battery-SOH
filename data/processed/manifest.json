@@ -1,0 +1,54 @@
+{
+  "source": "NASA PCoE Battery Data Set",
+  "derived_from": "NASA battery source archive provided by repository owner; cycle-level output, not original MATLAB traces",
+  "dataset_sha256": {
+    "B0005": {
+      "rows": 168,
+      "sha256": "d7831ec2c08076d210297613b42deb5c65da56543cc099ad8976ef1f0defab4b"
+    },
+    "B0006": {
+      "rows": 168,
+      "sha256": "727aa867864a8561f12a5510a357b8cbcd09d5969419a342cbe10468a82aef57"
+    },
+    "B0007": {
+      "rows": 168,
+      "sha256": "2d10ff22f1d74a697b6d6332fe9da25bbd7ade4c90af3fee1c90f9af927e9c70"
+    },
+    "B0018": {
+      "rows": 132,
+      "sha256": "04e8813cb5c90ba9182e0a296f8d390ec906e3aae3eec9be005055f6ce4ca6ae"
+    },
+    "B0029": {
+      "rows": 40,
+      "sha256": "5f34401e96b801d7ffa6c5aa923bd9ddf49f346570a721e18e2f675f88dbe678"
+    },
+    "B0030": {
+      "rows": 40,
+      "sha256": "65055af08cf57b6ba8df3fe74832eb26d35e688c9bb1c80f3c31ef4b7bc08871"
+    },
+    "B0031": {
+      "rows": 40,
+      "sha256": "639961d94eb35f569e60e38437bee18b039f76187d98753da19dafd8f0e33ec7"
+    },
+    "B0032": {
+      "rows": 40,
+      "sha256": "c981efcd0cc6700c052b4f57eca9a42fbb130be3e5716d5f3e4c3e40f710b828"
+    }
+  },
+  "experiment_24c": {
+    "development": [
+      "B0005",
+      "B0006",
+      "B0007"
+    ],
+    "test": "B0018"
+  },
+  "experiment_43c": {
+    "development": [
+      "B0029",
+      "B0031",
+      "B0032"
+    ],
+    "test": "B0030"
+  }
+}

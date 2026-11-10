@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: 'Please cite the corresponding AIIT 2025 conference publication.'
+title: 'Smart Health State Diagnosis of Lithium-Ion Batteries Using Wavelet-Enhanced Hybrid Deep Learning with an Attention Mechanism'
+authors:
+  - family-names: Mchara
+    given-names: Walid
+  - family-names: Manai
+    given-names: Lazhar
+  - family-names: Khalfa
+    given-names: Mohamed Abdellatif
+  - family-names: Koubaa
+    given-names: Anis
+  - family-names: Raissi
+    given-names: Monia
+doi: 10.1109/AIIT63112.2025.11082918
