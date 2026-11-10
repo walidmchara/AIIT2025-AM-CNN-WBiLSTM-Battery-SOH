@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / 'src'))
 from aiit_soh.data import build_experiment
 from aiit_soh.model import make_model
 from aiit_soh.metrics import evaluate
+from training_recovery import EpochCheckpoint
 
 
 def main():
@@ -26,6 +27,8 @@ def main():
     ap.add_argument('--model', choices=['AM-CNN-WBiLSTM','AM-CNN-BiLSTM', 'AM-CNN-LSTM',
                                         'CNN-BiLSTM', 'CNN-LSTM'], default='AM-CNN-WBiLSTM')
     ap.add_argument('--epochs', type=int, default=None)
+    ap.add_argument('--checkpoint-dir', type=Path, help='Persistent recovery directory')
+    ap.add_argument('--resume', action='store_true')
     ap.add_argument('--smoke', action='store_true', help='Fast architecture/data pipeline check with small hidden sizes')
     ap.add_argument('--out', type=Path, default=ROOT / 'outputs/latest')
     args = ap.parse_args()
@@ -57,9 +60,20 @@ def main():
                        dropout=settings['dropout'])
     opt = torch.optim.Adam(model.parameters(), lr=protocol['learning_rate'])
     loader = DataLoader(TensorDataset(*dataset.train), batch_size=protocol['batch_size'], shuffle=True)
+    data_files = sorted(Path(args.data_dir).rglob("*.csv"))
+    recovery = EpochCheckpoint(args.checkpoint_dir or args.out / "recovery", {
+        "cfg": cfg, "group": args.group, "model": args.model, "epochs": epochs,
+        "smoke": args.smoke, "data": [(p.as_posix(), p.stat().st_size) for p in data_files],
+    })
+    stateful={"model":model,"optimizer":opt}
     best, best_weights = float('inf'), None
-    log=[]
-    for epoch in range(epochs):
+    log=[];start_epoch=0
+    if args.resume:
+        prev=recovery.restore(stateful,device="cpu")
+        start_epoch=prev["epoch"];best=prev["best"]
+        best_weights=prev["best_weights"];log=prev["log"]
+        print(f"Resuming from epoch {start_epoch}")
+    for epoch in range(start_epoch,epochs):
         model.train(); total=0; n=0
         for x,y in loader:
             opt.zero_grad(); pred=model(x)
@@ -72,7 +86,9 @@ def main():
             val=float((model(dataset.val[0])-dataset.val[1]).square().mean())
         log.append({'epoch':epoch+1,'train_MSE':total/n,'validation_MSE':val})
         if val<best: best=val;best_weights=copy.deepcopy(model.state_dict())
+        recovery.save(epoch+1,stateful,{"best":best,"best_weights":best_weights,"log":log})
         print(f'{args.group} {args.model} epoch {epoch+1}/{epochs}: train MSE={total/n:.6f}, validation MSE={val:.6f}')
+    if best_weights is None: raise RuntimeError("No validation checkpoint")
     model.load_state_dict(best_weights);model.eval()
     with torch.no_grad():pred=model(dataset.test[0]).cpu().numpy()
     actual=dataset.test[1].cpu().numpy()
