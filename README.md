@@ -19,33 +19,38 @@ The repository includes discharge-cycle measurements derived from the NASA PCoE 
 
 The eight CSV datasets are under [data/processed/nasa/](data/processed/nasa/). Source metadata and checksums appear in [data/processed/manifest.json](data/processed/manifest.json). The original high-frequency MATLAB traces are not included; these tables contain discharge-cycle aggregates. The SOH label is derived from per-cell capacity relative to the first observed discharge, and predictor features exclude capacity and current-cycle SOH values.
 
-## Environment
+## Quick start
 
-Python 3.10+ with PyTorch, NumPy and Pandas.
+Requires Python 3.10 or newer. The repository already includes the eight cycle-level NASA CSV files, so no account, credentials, data download, or external service is needed. From the repository directory:
 
 ```bash
+python -m venv .venv
+# Linux/macOS:
+source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pytest -q
+python train.py --group 24C --smoke --out outputs/check
 ```
 
-## Experiments
+The smoke command runs two reduced-width epochs to check the data/model path. For the configured full-width experiment (20 epochs by default):
 
 ```bash
-# Independent test on NASA battery B0018 (24 °C group)
-python train.py --group 24C --epochs 20 --out outputs/B0018
-
-# Independent test on NASA battery B0030 (43 °C group)
-python train.py --group 43C --epochs 20 --out outputs/B0030
-
-# Fast integration test: same real data, reduced neural-network width
-python train.py --group 24C --smoke --out outputs/check
-
-# CNN-BiLSTM control without wavelet activation or attention
-python train.py --group 24C --model CNN-BiLSTM --epochs 20 --out outputs/CNN_BiLSTM
+python train.py --group 24C --out outputs/B0018
 ```
 
-The training command saves a model checkpoint, training history, held-out-cell predictions and evaluation metrics. Validation, normalization and tuning never use the independent test cell.
+To run the other independent held-out-cell experiment:
 
-## Evaluation scope
+```bash
+python train.py --group 43C --out outputs/B0030
+```
 
-The model and data interface have automated tests. A new result is not equivalent to the publication's reported accuracy until the original feature extraction, optimizer settings, epochs and experimental rules are reconciled. [Architecture and validation notes](docs/ARCHITECTURE_AND_VALIDATION.md) document these distinctions. The closely related *Clean Energy* journal version has its own repository and experimental configuration.
+Each run saves `checkpoint.pt`, `training_history.csv`, `test_predictions.csv`, and `metrics.json` under its output directory. To use another dataset, pass `--data-dir` pointing to a directory of CSVs named for the battery IDs in the selected experiment; columns and feature requirements are described in [data/README.md](data/README.md). Different battery IDs also require updating the experiment split in `configs/paper.json`.
+
+## Experiments and paper correspondence
+
+The default model is the AM-CNN-WBiLSTM with the article's listed CNN widths, kernel/pool sizes, dropout, recurrent width, attention width, and Morlet expression; both Morlet parameters are read from `configs/paper.json`. The article does not fully specify the modified LSTM gates or all experiment protocol details; the Morlet-on-standard-BiLSTM implementation and protocol choices are documented in [configs/paper.json](configs/paper.json) and [the validation notes](docs/ARCHITECTURE_AND_VALIDATION.md). As a result, this repository supports transparent, independent runs on the bundled cycle aggregates; it does not claim to exactly reproduce the paper's reported scores.
+
+An ablation can be selected with `--model`, for example `--model CNN-BiLSTM`. Validation, normalization and tuning never use the independent test cell.
+
+The paper itself is identified by its [DOI](https://doi.org/10.1109/AIIT63112.2025.11082918); no full-text copy or original experiment scripts are included here. The closely related *Clean Energy* journal version has its own repository and experimental configuration and should not be treated as the same experiment.
