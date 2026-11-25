@@ -53,4 +53,4 @@ The default model is the AM-CNN-WBiLSTM with the article's listed CNN widths, ke
 
 An ablation can be selected with `--model`, for example `--model CNN-BiLSTM`. Validation, normalization and tuning never use the independent test cell.
 
-The paper itself is identified by its [DOI](https://doi.org/10.1109/AIIT63112.2025.11082918); no full-text copy or original experiment scripts are included here. The closely related *Clean Energy* journal version has its own repository and experimental configuration and should not be treated as the same experiment.
+The paper itself is identified by its [DOI](https://doi.org/10.1109/AIIT63112.2025.11082918); no full-text copy or original experiment scripts are included here. 
