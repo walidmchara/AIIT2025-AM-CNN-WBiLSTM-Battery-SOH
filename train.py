@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import copy
+import hashlib
 import json
 import random
 import sys
@@ -57,13 +58,19 @@ def main():
                        pools=tuple(settings['pool_sizes']),
                        lstm_hidden=settings['lstm_hidden'],
                        attention_units=settings['attention_units'],
-                       dropout=settings['dropout'])
+                       dropout=settings['dropout'],
+                       morlet_frequency=settings['morlet_frequency'],
+                       morlet_variance_divisor=settings['morlet_variance_divisor'])
     opt = torch.optim.Adam(model.parameters(), lr=protocol['learning_rate'])
     loader = DataLoader(TensorDataset(*dataset.train), batch_size=protocol['batch_size'], shuffle=True)
-    data_files = sorted(Path(args.data_dir).rglob("*.csv"))
+    data_files = []
+    for cell in experiment['train'] + [experiment['test']]:
+        path = Path(args.data_dir) / f'{cell}.csv'
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        data_files.append({'path': path.name, 'sha256': digest})
     recovery = EpochCheckpoint(args.checkpoint_dir or args.out / "recovery", {
         "cfg": cfg, "group": args.group, "model": args.model, "epochs": epochs,
-        "smoke": args.smoke, "data": [(p.as_posix(), p.stat().st_size) for p in data_files],
+        "smoke": args.smoke, "data": data_files,
     })
     stateful={"model":model,"optimizer":opt}
     best, best_weights = float('inf'), None

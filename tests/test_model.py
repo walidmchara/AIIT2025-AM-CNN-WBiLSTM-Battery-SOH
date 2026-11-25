@@ -10,6 +10,19 @@ def test_wavelet_formula():
     x=torch.tensor([-1.,0.,1.]); expected=torch.cos(2.1*x)*torch.exp(-x*x/3)
     assert torch.allclose(morlet(x),expected)
 
+
+def test_configured_wavelet_parameters_are_used():
+    torch.manual_seed(7)
+    m=make_model('AM-CNN-WBiLSTM',features=7,**SMALL,
+                 morlet_frequency=1.2,morlet_variance_divisor=2.0)
+    m.eval()
+    x=torch.ones(2,16,7)
+    configured=m(x)
+    m.morlet_frequency=2.8
+    changed=m(x)
+    assert not torch.allclose(configured,changed)
+
+
 @pytest.mark.parametrize('kind',['AM-CNN-WBiLSTM','AM-CNN-BiLSTM','AM-CNN-LSTM','CNN-BiLSTM','CNN-LSTM'])
 def test_variants(kind):
     m=make_model(kind,features=7,**SMALL)

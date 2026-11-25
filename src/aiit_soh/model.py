@@ -20,10 +20,13 @@ class AMCNNWaveletBiLSTM(nn.Module):
     def __init__(self, features: int, conv_filters=(32, 64, 128),
                  kernels=(3, 3, 3), pools=(2, 2, 2), lstm_hidden=156,
                  attention_units=312, dropout=0.3, use_wavelet=True,
-                 use_attention=True, bidirectional=True):
+                 use_attention=True, bidirectional=True,
+                 morlet_frequency=2.1, morlet_variance_divisor=3.0):
         super().__init__()
         self.use_wavelet = use_wavelet
         self.use_attention = use_attention
+        self.morlet_frequency = morlet_frequency
+        self.morlet_variance_divisor = morlet_variance_divisor
         blocks = []
         channels = features
         for count, width, pool in zip(conv_filters, kernels, pools):
@@ -46,7 +49,7 @@ class AMCNNWaveletBiLSTM(nn.Module):
         h = self.cnn(x.transpose(1, 2)).transpose(1, 2)
         h, _ = self.lstm(self.dropout(h))
         if self.use_wavelet:
-            h = morlet(h)
+            h = morlet(h, self.morlet_frequency, self.morlet_variance_divisor)
         if self.use_attention:
             # Table I specifies sigmoid; normalizing the gates produces
             # a convex temporal weighting, consistent with Eqs. (9)–(11).
